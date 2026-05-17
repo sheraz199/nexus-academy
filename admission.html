@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nexus Academy - Course Enrollment</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Custom Dark Theme Styling */
+        body { background-color: #121212; }
+        .brand-header { 
+            background-color: #0b111e; 
+            border-bottom: 2px solid #0d6efd;
+            padding: 2.5rem 0; 
+            text-align: center; 
+            margin-bottom: 2.5rem; 
+        }
+        .brand-header h1 { color: #ffffff; }
+        .brand-header p { color: #a1b4cc; }
+        
+        /* Adjusted bank card for dark mode */
+        .bank-card { 
+            background: linear-gradient(135deg, #0f203b 0%, #17315e 100%); 
+            color: #e0e0e0; 
+            border: 1px solid #233f75; 
+            border-radius: 15px; 
+        }
+        .card { background-color: #1e1e1e; border: 1px solid #2d2d2d; }
+        
+        /* Dynamic Fee Card Styling */
+        .dynamic-fee-card {
+            background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%);
+            color: white;
+            border-radius: 10px;
+            display: none;
+            transition: all 0.3s ease-in-out;
+        }
+
+        #successMessage, #errorMessage, #loadingMessage { display: none; margin-top: 15px; }
+        .status-icon { font-size: 1.5rem; vertical-align: middle; margin-right: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="brand-header shadow">
+        <div class="container">
+            <h1 class="display-5 fw-bold">Nexus Academy</h1>
+            <p class="lead mb-0">Learning without limits</p>
+        </div>
+    </div>
+
+    <div class="container mb-5">
+        <div class="row g-4">
+            
+            <div class="col-md-4">
+                <div class="card bank-card shadow-sm">
+                    <div class="card-body p-4">
+                        <h4 class="card-title mb-4 text-white">Fee Payment Details</h4>
+                        <p class="mb-1 text-light opacity-75">Bank Name</p>
+                        <h5 class="mb-3 text-white">Standard Chartered Bank</h5>
+                        
+                        <p class="mb-1 text-light opacity-75">Account Title</p>
+                        <h5 class="mb-3 text-white">Nexus Academy</h5>
+                        
+                        <p class="mb-1 text-light opacity-75">Account Number</p>
+                        <h5 class="mb-4 text-white">1234 5678 9012 3456</h5>
+                        
+                        <hr class="border-light opacity-25">
+                        <p class="small mb-0 text-light opacity-75">Please transfer your calculated course fee to the account above and take a screenshot or photo of the receipt to upload in the enrollment form.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-body p-4">
+                        <h3 class="mb-4 text-white">Student Enrollment Form</h3>
+                        
+                        <form id="enrollmentForm">
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="fullName" class="form-label">Full Name</label>
+                                    <input type="text" class="form-control" id="fullName" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="email" class="form-label">Email Address</label>
+                                    <input type="email" class="form-control" id="email" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="phone" class="form-label">Phone Number</label>
+                                    <input type="tel" class="form-control" id="phone" required>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="city" class="form-label">City</label>
+                                    <input type="text" class="form-control" id="city" required>
+                                </div>
+                                
+                                <div class="col-12">
+                                    <label for="course" class="form-label">Course Selection</label>
+                                    <select class="form-select" id="course" required>
+                                        <option value="" data-fee="0" selected disabled>Choose a course...</option>
+                                        <option value="Advanced computer course" data-fee="3500">Advanced computer course</option>
+                                        <option value="English Language Course" data-fee="3000">English Language Course</option>
+                                        <option value="Frontend Development" data-fee="3000">Frontend Development</option>
+                                        <option value="CCNA Routing & Switching" data-fee="6000">CCNA Routing & Switching</option>
+                                        <option value="Foundation Bundle (Adv Computer + English)" data-fee="4550">Foundation Bundle - 30% OFF (Adv. Computer + English)</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-12 mt-3">
+                                    <div class="card dynamic-fee-card shadow-sm border-0" id="feeCard">
+                                        <div class="card-body d-flex justify-content-between align-items-center p-3">
+                                            <h5 class="mb-0 text-white">Total Payable Fee:</h5>
+                                            <h4 class="mb-0 fw-bold text-white"><span id="feeAmount">0</span> PKR</h4>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 mt-3">
+                                    <label for="receipt" class="form-label">Fee Receipt Upload</label>
+                                    <input class="form-control" type="file" id="receipt" accept=".png, .jpg, .jpeg" required>
+                                    <div class="form-text opacity-75">Accepted formats: PNG, JPG, JPEG.</div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <button type="submit" class="btn btn-primary btn-lg w-100" id="submitBtn">Submit Enrollment</button>
+                            </div>
+                        </form>
+
+                        <div id="loadingMessage" class="alert alert-info">
+                            <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                            Processing your application and uploading receipt... Please wait.
+                        </div>
+                        
+                        <div id="successMessage" class="alert alert-success">
+                            <span class="status-icon">✅</span> <strong>Success!</strong> Your enrollment and fee receipt have been submitted successfully.
+                        </div>
+                        
+                        <div id="errorMessage" class="alert alert-danger">
+                            <span class="status-icon">❌</span> <strong>Submission Failed.</strong> <span id="errorText">Something went wrong. Please try again.</span>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <script>
+        // --- API CONFIGURATION ---
+        const IMGBB_API_KEY = '19e30ded889f32e6e31c0f08e3e8551f';
+        const SHEETDB_API_URL = 'https://sheetdb.io/api/v1/wo5gxgthib54q'; 
+        // -------------------------
+
+        // Handle Dynamic Fee Card Display
+        document.getElementById('course').addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const fee = selectedOption.getAttribute('data-fee');
+            const feeCard = document.getElementById('feeCard');
+            const feeAmount = document.getElementById('feeAmount');
+
+            if (fee && fee > 0) {
+                feeAmount.textContent = fee;
+                feeCard.style.display = 'block'; 
+            } else {
+                feeCard.style.display = 'none'; 
+            }
+        });
+
+        // Handle Form Submission
+        document.getElementById('enrollmentForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const loadingMsg = document.getElementById('loadingMessage');
+            const successMsg = document.getElementById('successMessage');
+            const errorMsg = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+
+            // Pre-flight check for SheetDB URL
+            if (SHEETDB_API_URL === 'YOUR_SHEETDB_API_URL_HERE' || SHEETDB_API_URL === '') {
+                errorText.textContent = "Configuration Error: Please add your SheetDB API URL into the code.";
+                errorMsg.style.display = 'block';
+                return;
+            }
+
+            // Reset UI states
+            submitBtn.disabled = true;
+            loadingMsg.style.display = 'block';
+            successMsg.style.display = 'none';
+            errorMsg.style.display = 'none';
+
+            try {
+                // STEP 1: Upload Image to ImgBB
+                const receiptFile = document.getElementById('receipt').files[0];
+                const imageFormData = new FormData();
+                imageFormData.append('image', receiptFile);
+
+                const imgbbResponse = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_API_KEY}`, {
+                    method: 'POST',
+                    body: imageFormData
+                });
+
+                // Safely parse ImgBB Response
+                const imgbbText = await imgbbResponse.text();
+                let imgbbResult;
+                try {
+                    imgbbResult = JSON.parse(imgbbText);
+                } catch (parseError) {
+                    throw new Error("Received an invalid response from the image server.");
+                }
+
+                if (!imgbbResult || !imgbbResult.success) {
+                    throw new Error("Failed to upload receipt image to ImgBB.");
+                }
+
+                const receiptUrl = imgbbResult.data.url;
+
+                // STEP 2: Send Data to SheetDB
+                const studentData = {
+                    data: [{
+                        "Name": document.getElementById('fullName').value,
+                        "Email": document.getElementById('email').value,
+                        "Phone": document.getElementById('phone').value,
+                        "City": document.getElementById('city').value,
+                        "Course": document.getElementById('course').value,
+                        "ReceiptURL": receiptUrl
+                    }]
+                };
+
+                const sheetdbResponse = await fetch(SHEETDB_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(studentData)
+                });
+
+                if (sheetdbResponse.ok) {
+                    loadingMsg.style.display = 'none';
+                    successMsg.style.display = 'block';
+                    document.getElementById('enrollmentForm').reset();
+                    document.getElementById('feeCard').style.display = 'none'; 
+                } else {
+                    throw new Error("Failed to save data to the Google Sheet database.");
+                }
+
+            } catch (error) {
+                loadingMsg.style.display = 'none';
+                errorText.textContent = error.message || "An unexpected error occurred. Please check your connection.";
+                errorMsg.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>
